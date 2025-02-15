@@ -59,8 +59,7 @@ app.post('/', async (req, res) => {
                     productName: name,
                     productCategory: category,
                     productPrice: parseFloat(price),
-                    productQuantity: parseInt(quantity),
-                    productLocation: location,
+                    productQuantity: parseInt(quantity), productLocation: location,
                     productUnit: unit,
                     productFreshness: freshness,
                     HarvestDate: new Date(harvestDate)
@@ -120,3 +119,13 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+
+
+
+
+
+
+    
+    
+    
