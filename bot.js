@@ -12,7 +12,7 @@ const client = twilio(accountSid, authToken);
 const { MongoClient } = require('mongodb');
 
 // Replace with your MongoDB connection string
-const uri = "mongodb://localhost:27017";
+const uri = "mongodb://127.0.0.1:27017";
 const dbName = "Buyer"; // Replace with your DB name
 const collectionName = "products"; // Replace with your collection name
 let datas = [];  // Initialize as an empty array
