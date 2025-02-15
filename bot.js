@@ -11,8 +11,8 @@ const authToken = process.env.AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 const { MongoClient } = require('mongodb');
 
-// Replace with your MongoDB connection string
-const uri = "mongodb+srv://madhiuksha:madhi%40551@mernstack.ymu81.mongodb.net/";  // Use remote connection if deploying (e.g., MongoDB Atlas)
+// Use your MongoDB Atlas connection string
+const uri = "mongodb+srv://madhiuksha:madhi%40551@mernstack.ymu81.mongodb.net/";  
 const dbName = "Buyer"; // Your DB name
 const collectionName = "products"; // Your collection name
 
@@ -39,10 +39,8 @@ async function fetchData() {
 }
 
 // Initially fetch data when the server starts.
-// If your data changes often, consider calling fetchData() in the view handler.
 fetchData();
 
-// Endpoint to handle incoming WhatsApp messages
 app.post('/', async (req, res) => {
     const incomingMessage = req.body.Body;
     const from = req.body.From;
@@ -58,8 +56,8 @@ app.post('/', async (req, res) => {
     } else if (incomingMessage.toLowerCase().includes('add product')) {
         responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
     } else if (incomingMessage.toLowerCase().includes('view')) {
-        // Optionally, uncomment the next line to fetch fresh data each time:
-        // await fetchData();
+        // Fetch fresh data before viewing
+        await fetchData();
 
         if (datas.length === 0) {
             responseMessage = 'No products found.';
@@ -90,7 +88,6 @@ app.post('/', async (req, res) => {
         });
 });
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
