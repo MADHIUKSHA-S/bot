@@ -55,7 +55,9 @@ app.post('/', async (req, res) => {
     } else if (incomingMessage.toLowerCase().includes('add product')) {
         responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
     } else if (incomingMessage.toLowerCase().includes('view')) {
-      responseMessage = datas;
+        responseMessage = datas.map(item => 
+            `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
+        ).join('\n\n');
     } else {
         responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
     }
