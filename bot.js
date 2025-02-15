@@ -15,7 +15,7 @@ const { MongoClient } = require('mongodb');
 const uri = "mongodb://localhost:27017";
 const dbName = "Buyer"; // Replace with your DB name
 const collectionName = "products"; // Replace with your collection name
-
+let datas = ''
 async function fetchData() {
   const client = new MongoClient(uri);
   try {
@@ -27,6 +27,7 @@ async function fetchData() {
 
     // Fetch all documents from the collection
     const data = await collection.find().toArray();
+    datas = data
     console.log(data);  // Outputs the fetched data
   } catch (err) {
     console.error('Error fetching data:', err);
@@ -54,32 +55,7 @@ app.post('/', async (req, res) => {
     } else if (incomingMessage.toLowerCase().includes('add product')) {
         responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
     } else if (incomingMessage.toLowerCase().includes('view')) {
-        try {
-            // Connect to MongoDB and fetch data
-            const client = new MongoClient(uri);
-            await client.connect();
-            const database = client.db(dbName);
-            const collection = database.collection(collectionName);
-
-            // Fetch all documents from the collection
-            const data = await collection.find().toArray();
-            await client.close();
-            console.log('Fetched products:', data);
-            if (data.length > 0) {
-                // Format the product list
-                responseMessage = 'Here are the available products:\n';
-                data.forEach((item, index) => {
-                    responseMessage += `${index + 1}. ${item.productName} - ${item.productCategory} - ₹${item.productPrice} - ${item.productQuantity} ${item.productUnit}\n`;
-                    responseMessage += `Harvest Date: ${new Date(item.HarvestDate).toLocaleDateString()}\n`;  // Format the date
-                });
-                
-            } else {
-                responseMessage = 'No products are currently available.';
-            }
-        } catch (err) {
-            console.error('Error fetching data:', err);
-            responseMessage = 'Sorry, there was an error fetching the products.';
-        }
+      responseMessage = datas;
     } else {
         responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
     }
