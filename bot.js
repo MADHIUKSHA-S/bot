@@ -64,13 +64,15 @@ app.post('/', async (req, res) => {
             // Fetch all documents from the collection
             const data = await collection.find().toArray();
             await client.close();
-
+            console.log('Fetched products:', data);
             if (data.length > 0) {
                 // Format the product list
                 responseMessage = 'Here are the available products:\n';
                 data.forEach((item, index) => {
-                    responseMessage += `${index + 1}. ${item.productName} - ${item.productCategory} - ${item.productPrice} - ${item.productQuantity} ${item.productUnit}\n`;
+                    responseMessage += `${index + 1}. ${item.productName} - ${item.productCategory} - ₹${item.productPrice} - ${item.productQuantity} ${item.productUnit}\n`;
+                    responseMessage += `Harvest Date: ${new Date(item.HarvestDate).toLocaleDateString()}\n`;  // Format the date
                 });
+                
             } else {
                 responseMessage = 'No products are currently available.';
             }
