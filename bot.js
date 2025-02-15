@@ -29,7 +29,10 @@ async function fetchData() {
     // Fetch all documents from the collection
     const data = await collection.find().toArray();
     datas = data;
-    console.log(data);  // Outputs the fetched data
+    responseMessage = datas.map(item => 
+        `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
+    ).join('\n\n');
+    console.log(responseMessage)
   } catch (err) {
     console.error('Error fetching data:', err);
   } finally {
@@ -57,15 +60,12 @@ app.post('/', async (req, res) => {
         responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
     } else if (incomingMessage.toLowerCase().includes('view')) {
         // Check if there are any products
-        if (datas.length === 0) {
-            responseMessage = 'No products found.';
-        } else {
+        
             responseMessage = datas.map(item => 
                 `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
             ).join('\n\n');
             console.log(responseMessage)
-        }
-    } else {
+ } else {
         responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
     }
 
