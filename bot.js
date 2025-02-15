@@ -1,13 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
-require('dotenv').config()
+require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const accountSid = process.env.SID;
-const authToken = process.env.AUTH_TOKEN
+const authToken = process.env.AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 const { MongoClient } = require('mongodb');
 
@@ -15,7 +15,8 @@ const { MongoClient } = require('mongodb');
 const uri = "mongodb://localhost:27017";
 const dbName = "Buyer"; // Replace with your DB name
 const collectionName = "products"; // Replace with your collection name
-let datas = ''
+let datas = [];  // Initialize as an empty array
+
 async function fetchData() {
   const client = new MongoClient(uri);
   try {
@@ -27,7 +28,7 @@ async function fetchData() {
 
     // Fetch all documents from the collection
     const data = await collection.find().toArray();
-    datas = data
+    datas = data;
     console.log(data);  // Outputs the fetched data
   } catch (err) {
     console.error('Error fetching data:', err);
@@ -55,9 +56,15 @@ app.post('/', async (req, res) => {
     } else if (incomingMessage.toLowerCase().includes('add product')) {
         responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
     } else if (incomingMessage.toLowerCase().includes('view')) {
-        responseMessage = datas.map(item => 
-            `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
-        ).join('\n\n');
+        // Check if there are any products
+        if (datas.length === 0) {
+            responseMessage = 'No products found.';
+        } else {
+            responseMessage = datas.map(item => 
+                `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
+            ).join('\n\n');
+            console.log(responseMessage)
+        }
     } else {
         responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
     }
@@ -78,7 +85,6 @@ app.post('/', async (req, res) => {
             res.status(500).send('Error sending message');
         });
 });
-
 
 // Start the server
 const PORT = process.env.PORT || 3000;
