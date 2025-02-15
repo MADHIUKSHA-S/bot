@@ -12,7 +12,7 @@ const client = twilio(accountSid, authToken);
 const { MongoClient } = require('mongodb');
 
 // Replace with your MongoDB connection string
-const uri = "mongodb://127.0.0.1:27017";  // Use remote connection if deploying (e.g., MongoDB Atlas)
+const uri = "mongodb+srv://madhiuksha:madhi%40551@mernstack.ymu81.mongodb.net/";  // Use remote connection if deploying (e.g., MongoDB Atlas)
 const dbName = "Buyer"; // Your DB name
 const collectionName = "products"; // Your collection name
 
