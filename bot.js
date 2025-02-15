@@ -11,7 +11,7 @@ const authToken = process.env.AUTH_TOKEN
 const client = twilio(accountSid, authToken);
 
 // Endpoint to handle incoming WhatsApp messages
-app.post('/webhook', (req, res) => {
+app.post('/', (req, res) => {
     const incomingMessage = req.body.Body;
     const from = req.body.From;
 
