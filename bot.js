@@ -144,17 +144,46 @@ app.post('/', async (req, res) => {
     } else {
       responseMessage = 'Invalid format. Use: edit product productName newProductName newProductCategory newProductPrice newProductQuantity newProductLocation newProductUnit newProductFreshness newHarvestDate';
     }
-  } else if (incomingMessage.toLowerCase().includes('view')) {
+} else if (incomingMessage.toLowerCase() === 'view') {
+    // View all products
     await fetchData();
-
+  
     if (datas.length === 0) {
       responseMessage = 'No products found.';
     } else {
       responseMessage = datas.map(item =>
-        `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
+        `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, Harvest Date: ${item.HarvestDate}`
       ).join('\n\n');
     }
-  } else {
+  } else if (incomingMessage.toLowerCase().startsWith('view ')) {
+    // View a specific product
+    const productName = incomingMessage.substring(5).trim();
+  
+    if (productName) {
+      try {
+        const mongoClient = new MongoClient(uri);
+        await mongoClient.connect();
+        const database = mongoClient.db(dbName);
+        const collection = database.collection(collectionName);
+  
+        // Find the specific product by its name
+        const product = await collection.findOne({ productName });
+  
+        if (product) {
+          responseMessage = `Name: ${product.productName}, Category: ${product.productCategory}, Price: ${product.productPrice}, Quantity: ${product.productQuantity}, Location: ${product.productLocation}, Unit: ${product.productUnit}, Freshness: ${product.productFreshness}, Harvest Date: ${product.HarvestDate}`;
+        } else {
+          responseMessage = 'Product not found.';
+        }
+      } catch (err) {
+        console.error('Error fetching product details:', err);
+        responseMessage = 'Failed to fetch product details. Please try again.';
+      }
+    } else {
+      responseMessage = 'Please provide the product name. Use: view productName';
+    }
+  }
+  
+  else {
     responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
   }
 
