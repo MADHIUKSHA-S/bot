@@ -20,13 +20,17 @@ app.post('/', (req, res) => {
     // Simple bot logic
     let responseMessage = '';
 
-    if (incomingMessage.toLowerCase().includes('hello')) {
-        responseMessage = 'Hi there! How can I assist you today?';
-    } else if (incomingMessage.toLowerCase().includes('bye')) {
-        responseMessage = 'Goodbye! Have a great day!';
-    } else {
-        responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
-    }
+    // Example response handling
+if (incomingMessage.toLowerCase().includes('hello')) {
+    responseMessage = 'Hi there! How can I assist you today?';
+} else if (incomingMessage.toLowerCase().includes('bye')) {
+    responseMessage = 'Goodbye! Have a great day!';
+} else if (incomingMessage.toLowerCase().includes('add product')) {
+    responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
+} else {
+    responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
+}
+
 
     // Send the response back to the user
     client.messages
