@@ -12,34 +12,34 @@ const client = twilio(accountSid, authToken);
 const { MongoClient } = require('mongodb');
 
 // Replace with your MongoDB connection string
-const uri = "mongodb://127.0.0.1:27017";
-const dbName = "Buyer"; // Replace with your DB name
-const collectionName = "products"; // Replace with your collection name
-let datas = [];  // Initialize as an empty array
+const uri = "mongodb://127.0.0.1:27017";  // Use remote connection if deploying (e.g., MongoDB Atlas)
+const dbName = "Buyer"; // Your DB name
+const collectionName = "products"; // Your collection name
+
+let datas = [];  // Global array to store fetched data
 
 async function fetchData() {
-  const client = new MongoClient(uri);
+  const mongoClient = new MongoClient(uri);
   try {
-    await client.connect();
+    await mongoClient.connect();
     console.log("Connected to the database");
 
-    const database = client.db(dbName);
+    const database = mongoClient.db(dbName);
     const collection = database.collection(collectionName);
 
     // Fetch all documents from the collection
     const data = await collection.find().toArray();
     datas = data;
-    responseMessage = datas.map(item => 
-        `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
-    ).join('\n\n');
-    console.log(responseMessage)
+    console.log("Fetched Data:\n", datas);
   } catch (err) {
     console.error('Error fetching data:', err);
   } finally {
-    await client.close();
+    await mongoClient.close();
   }
 }
 
+// Initially fetch data when the server starts.
+// If your data changes often, consider calling fetchData() in the view handler.
 fetchData();
 
 // Endpoint to handle incoming WhatsApp messages
@@ -49,7 +49,6 @@ app.post('/', async (req, res) => {
 
     console.log(`Received message: ${incomingMessage} from ${from}`);
 
-    // Simple bot logic
     let responseMessage = '';
 
     if (incomingMessage.toLowerCase().includes('hello')) {
@@ -59,17 +58,22 @@ app.post('/', async (req, res) => {
     } else if (incomingMessage.toLowerCase().includes('add product')) {
         responseMessage = 'What product would you like to add? Please provide details in the format: productName productCategory productPrice productQuantity productLocation productUnit productFreshness HarvestDate (ISO8601 format).';
     } else if (incomingMessage.toLowerCase().includes('view')) {
-        // Check if there are any products
-        
+        // Optionally, uncomment the next line to fetch fresh data each time:
+        // await fetchData();
+
+        if (datas.length === 0) {
+            responseMessage = 'No products found.';
+        } else {
             responseMessage = datas.map(item => 
                 `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, HarvestDate: ${item.HarvestDate}`
             ).join('\n\n');
-            console.log(responseMessage)
- } else {
+        }
+        console.log("Response for view:\n", responseMessage);
+    } else {
         responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
     }
 
-    // Send the response back to the user
+    // Send the response back to the user via Twilio
     client.messages
         .create({
             from: 'whatsapp:+14155238886',
