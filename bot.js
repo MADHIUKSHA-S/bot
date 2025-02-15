@@ -76,9 +76,21 @@ app.post('/', async (req, res) => {
   
     let responseMessage = '';
   
-    if (incomingMessage.toLowerCase().includes('hello')) {
+    // Check if the message is an emoji and if it's a known product emoji
+    if (emojiToProductName[incomingMessage]) {
+      const productName = emojiToProductName[incomingMessage];
+
+      // Fetch the product details by product name
+      const product = datas.find(item => item.productName.toLowerCase() === productName.toLowerCase());
+
+      if (product) {
+        responseMessage = `Name: ${product.productName}, Category: ${product.productCategory}, Price: ${product.productPrice}, Quantity: ${product.productQuantity}, Location: ${product.productLocation}, Unit: ${product.productUnit}, Freshness: ${product.productFreshness}, Harvest Date: ${product.HarvestDate}`;
+      } else {
+        responseMessage = `Product not found for emoji: ${incomingMessage}`;
+      }
+    } else if (incomingMessage.toLowerCase() === 'hello') {
       responseMessage = 'Hi there! How can I assist you today?';
-    } else if (incomingMessage.toLowerCase().includes('bye')) {
+    } else if (incomingMessage.toLowerCase() === 'bye') {
       responseMessage = 'Goodbye! Have a great day!';
     } else if (incomingMessage.toLowerCase().startsWith('add product')) {
       const productDetails = incomingMessage.substring(12).trim().split(' ');
@@ -190,7 +202,7 @@ app.post('/', async (req, res) => {
         responseMessage = 'No products found.';
       } else {
         responseMessage = datas.map(item =>
-          `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, Harvest Date: ${item.HarvestDate}`
+          `Name: ${item.productName}, Category: ${item.productCategory}, Price: ${item.productPrice}, Quantity: ${item.productQuantity}, Location: ${item.productLocation}, Unit: ${item.productUnit}, Freshness: ${item.productFreshness}, Harvest Date: ${item.HarvestDate}`  
         ).join('\n\n');
       }
     } else if (incomingMessage.toLowerCase().startsWith('view ')) {
@@ -219,9 +231,7 @@ app.post('/', async (req, res) => {
       } else {
         responseMessage = 'Please provide the product name. Use: view productName';
       }
-    }
-    
-    else {
+    } else {
       responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
     }
   
