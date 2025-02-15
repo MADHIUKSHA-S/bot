@@ -47,48 +47,68 @@ app.post('/', async (req, res) => {
                 // View all products
                 const products = await Product.find({});
                 responseMessage = products.map(p => 
-                    `${p.productName} (${p.productCategory}): ${p.productQuantity} ${p.productUnit} available at ₹${p.productPrice}/${p.productUnit}. Location: ${p.productLocation}, Freshness: ${p.productFreshness}, Harvest Date: ${p.HarvestDate.toDateString()}`
+                    `${p.productName} (${p.productCategory}): ${p.productQuantity} ${p.productUnit} available at ₹${p.productPrice}/${p.productUnit}. Location: ${p.productLocation}, Freshness: ${p.productFreshness}, Harvest Date: ${p.HarvestDate ? p.HarvestDate.toDateString() : 'N/A'}`
                 ).join('\n\n');
                 if (!responseMessage) responseMessage = 'No products found.';
                 break;
 
-            case 'add':
+            case 'add': {
                 // Add a new product
                 const [name, category, price, quantity, location, unit, freshness, harvestDate] = incomingMessage.split(' ').slice(1);
+                
+                // Convert the provided harvestDate string to a Date object
+                const harvestDateObj = new Date(harvestDate);
+                if (isNaN(harvestDateObj)) {
+                    responseMessage = 'Invalid date format for HarvestDate. Please use ISO 8601 format.';
+                    break;
+                }
+
                 const newProduct = new Product({
                     productName: name,
                     productCategory: category,
                     productPrice: parseFloat(price),
-                    productQuantity: parseInt(quantity), productLocation: location,
+                    productQuantity: parseInt(quantity),
+                    productLocation: location,
                     productUnit: unit,
                     productFreshness: freshness,
-                    HarvestDate: new Date(harvestDate)
+                    HarvestDate: harvestDateObj
                 });
                 await newProduct.save();
                 responseMessage = 'Product added successfully!';
                 break;
-
-            case 'delete':
+            }
+            case 'delete': {
                 // Delete a product by name
                 const productName = incomingMessage.split(' ')[1];
                 await Product.deleteOne({ productName });
                 responseMessage = 'Product deleted successfully!';
                 break;
-
-            case 'edit':
+            }
+            case 'edit': {
                 // Edit a product
                 const [editName, field, newValue] = incomingMessage.split(' ').slice(1);
                 const updateQuery = { productName: editName };
-                const updateData = { [field]: newValue };
-                if (field === 'productPrice' || field === 'productQuantity') {
+                let updateData = {};
+
+                if (field === 'productPrice') {
                     updateData[field] = parseFloat(newValue);
+                } else if (field === 'productQuantity') {
+                    updateData[field] = parseInt(newValue);
                 } else if (field === 'HarvestDate') {
-                    updateData[field] = new Date(newValue);
+                    const newDate = new Date(newValue);
+                    if (isNaN(newDate)) {
+                        responseMessage = 'Invalid date format for HarvestDate. Please use ISO 8601 format.';
+                        break;
+                    }
+                    updateData[field] = newDate;
+                } else {
+                    updateData[field] = newValue;
                 }
+
                 await Product.updateOne(updateQuery, updateData);
                 responseMessage = 'Product updated successfully!';
                 break;
-
+            }
             default:
                 responseMessage = 'I’m sorry, I didn’t understand that. Can you please rephrase?';
         }
@@ -119,13 +139,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
-
-
-
-
-
-
-    
-    
-    
